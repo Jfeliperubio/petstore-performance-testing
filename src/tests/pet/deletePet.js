@@ -1,41 +1,34 @@
 import http from 'k6/http';
 import { check, sleep } from 'k6';
 
+// Constantes para las cargas
+const CARGAS = {
+    ligera: 5, // 0.025 VUs equivalen a 5 VUs para facilitar el ejemplo
+    constante: 10, // 0.05 VUs equivalen a 10 VUs
+    pico: 30, // 0.15 VUs equivalen a 30 VUs
+};
 
-const cargaLigera = 5; // Asumiendo que 0.025 VUs equivalen a 5 VUs para facilitar el ejemplo
-const cargaConstante = 10; // Asumiendo que 0.05 VUs equivalen a 10 VUs
-const cargaPico = 30; // Asumiendo que 0.15 VUs equivalen a 30 VUs
+// Determinar el tipo de carga desde la variable de entorno o usar un valor predeterminado
+let tipoCarga = __ENV.TIPO_CARGA || "ligera";
 
-
-let tipoCarga = __ENV.TIPO_CARGA || "cargaLigera"; // cargaLigera es el valor predeterminado
-
-let stages = [];
-
-if (tipoCarga === "cargaLigera") {
-    stages = [
-        { duration: '1m', target: cargaLigera },
-        { duration: '3m', target: cargaLigera },
-        { duration: '1m', target: 0 },
-    ];
-} else if (tipoCarga === "cargaConstante") {
-    stages = [
-        { duration: '1m', target: cargaConstante },
-        { duration: '3m', target: cargaConstante },
-        { duration: '1m', target: 0 },
-    ];
-} else if (tipoCarga === "cargaPico") {
-    stages = [
-        { duration: '1m', target: cargaPico },
-        { duration: '3m', target: cargaPico },
+// Función para obtener las etapas de carga dinámicamente
+function obtenerEtapas(carga) {
+    return [
+        { duration: '1m', target: carga },
+        { duration: '3m', target: carga },
         { duration: '1m', target: 0 },
     ];
 }
 
 export let options = {
-    stages: stages,
+    stages: obtenerEtapas(CARGAS[tipoCarga] || CARGAS.cargaLigera), // Usar la función para obtener las etapas
     thresholds: {
-        'http_req_duration': ['p(95)<200'],
-        'http_req_failed': ['rate<0.01'],
+        'http_req_duration': ['p(95)<200'], // 95% de las solicitudes deben ser menores a 200ms
+        'http_req_failed': ['rate<0.01'], // Tasa de fallos debe ser menor al 1%
+    },
+    tags: {
+        tipo_de_carga: tipoCarga, // Añadir el tipo de carga como un tag global
+        caso_de_prueba: "ActualizacionPet", // Ejemplo de nombre para el caso de prueba
     },
 };
 
@@ -45,6 +38,11 @@ export default function () {
     let headers = { 'Accept': '*/*' };
 
     let response = http.del(url, null, { headers: headers });
+
+    // Verificar la respuesta
+    check(response, {
+        'is status 200': r => r.status === 200,
+    });
 
     sleep(1); // Pausa entre llamadas para simular el comportamiento del usuario
 }
