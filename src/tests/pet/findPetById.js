@@ -1,15 +1,24 @@
 import http from 'k6/http';
 import { check } from 'k6';
 
+let tipoCarga = __ENV.TIPO_CARGA || 'ligera'; // Utiliza la variable de entorno TIPO_CARGA o 'ligera' por defecto
+
 export let options = {
-    stages: [],
+    stages: [
+        // Configuración por defecto para 'ligera'. Se sobrescribirá según el caso.
+        { duration: '1m', target: 5 },
+    ],
     thresholds: {
         'http_req_duration': ['p(95)<500'], // El 95% de las solicitudes deben completarse por debajo de 500ms
+    },
+    tags: {
+        tipo_de_carga: tipoCarga, // Añade el tipo de carga como tag global
+        caso_de_prueba: "ConsultaPet", // Ejemplo de nombre para el caso de prueba
     }
 };
 
 // Configurar las etapas según la variable de entorno TIPO_CARGA
-switch (__ENV.TIPO_CARGA) {
+switch (tipoCarga) {
     case 'ligera':
         options.stages = [
             { duration: '1m', target: 5 }, // Simular una carga ligera
@@ -25,12 +34,7 @@ switch (__ENV.TIPO_CARGA) {
             { duration: '2m', target: 30 }, // Simular una carga de pico
         ];
         break;
-    default:
-        // Por defecto, usar carga ligera si TIPO_CARGA no está especificado
-        options.stages = [
-            { duration: '1m', target: 5 },
-        ];
-        break;
+    // No se necesita un default ya que el caso por defecto se maneja al definir tipoCarga
 }
 
 export default function () {

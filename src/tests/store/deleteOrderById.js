@@ -3,31 +3,31 @@ import { check, sleep } from 'k6';
 import { SharedArray } from 'k6/data';
 
 
-const cargaLigera = 10; // Asumiendo que 0.1 VUs equivalen a 10 VUs para facilitar el ejemplo
-const cargaConstante = 20; // Asumiendo que 0.2 VUs equivalen a 20 VUs
-const cargaPico = 60; // Asumiendo que 0.6 VUs equivalen a 60 VUs
+const ligera = 10; // Asumiendo que 0.1 VUs equivalen a 10 VUs para facilitar el ejemplo
+const constante = 20; // Asumiendo que 0.2 VUs equivalen a 20 VUs
+const pico = 60; // Asumiendo que 0.6 VUs equivalen a 60 VUs
 
 
-let tipoCarga = __ENV.TIPO_CARGA || "cargaLigera"; // cargaLigera es el valor predeterminado
+let tipoCarga = __ENV.TIPO_CARGA || "ligera"; // cargaLigera es el valor predeterminado
 
 let stages = [];
 
-if (tipoCarga === "cargaLigera") {
+if (tipoCarga === "ligera") {
     stages = [
-        { duration: '1m', target: cargaLigera },
-        { duration: '3m', target: cargaLigera },
+        { duration: '1m', target: ligera },
+        { duration: '3m', target: ligera },
         { duration: '1m', target: 0 },
     ];
-} else if (tipoCarga === "cargaConstante") {
+} else if (tipoCarga === "constante") {
     stages = [
-        { duration: '1m', target: cargaConstante },
-        { duration: '3m', target: cargaConstante },
+        { duration: '1m', target: constante },
+        { duration: '3m', target: constante },
         { duration: '1m', target: 0 },
     ];
-} else if (tipoCarga === "cargaPico") {
+} else if (tipoCarga === "pico") {
     stages = [
-        { duration: '1m', target: cargaPico },
-        { duration: '3m', target: cargaPico },
+        { duration: '1m', target: pico },
+        { duration: '3m', target: pico },
         { duration: '1m', target: 0 },
     ];
 }
@@ -37,6 +37,10 @@ export let options = {
     thresholds: {
         'http_req_duration': ['p(95)<250'], // Ajusta según tus requisitos de rendimiento
         'http_req_failed': ['rate<0.01'],   // Asegura que menos del 1% de las peticiones fallen
+    },
+    tags: {
+        tipo_de_carga: tipoCarga, // Añadir el tipo de carga como un tag global
+        caso_de_prueba: "ActualizacionPet", // Ejemplo de nombre para el caso de prueba
     },
 };
 
