@@ -1,9 +1,9 @@
 import http from 'k6/http';
 import { check, sleep } from 'k6';
 
-const cargaLigera = { duration: '1m', target: 1 }; // Simulando 0.3 VUs ajustando la duración y los sleeps
-const cargaConstante = { duration: '1m', target: 1 }; // Simulando 0.6 VUs ajustando la duración y los sleeps
-const cargaPico = { duration: '1m', target: 2 }; // Simulando 1.8 VUs ajustando la duración y los sleeps
+const cargaLigera = { duration: '1m', target: 10 }; // Simulando 0.3 VUs ajustando la duración y los sleeps
+const cargaConstante = { duration: '1m', target: 20 }; // Simulando 0.6 VUs ajustando la duración y los sleeps
+const cargaPico = { duration: '1m', target: 60 }; // Simulando 1.8 VUs ajustando la duración y los sleeps
 
 // Seleccionar el tipo de carga mediante una variable de entorno
 const cargaSeleccionada = __ENV.TIPO_CARGA || 'ligera'; // 'ligera', 'constante', 'pico'
